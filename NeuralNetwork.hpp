@@ -21,15 +21,8 @@ class NeuralNetwork{
             }
         }
 
-        void set_input(std::vector<double> input){
-            this->input = input;
-            for(int i=0;i<input.size();i++)
-                this->layers.at(i)->set_value(i, input.at(i));
-        }
+        // getters
 
-        void set_Node_val(int idx_layer, int idx_node, double val){
-            this->layers.at(idx_layer)->set_value(idx_node, val);
-        }
         Matrix* getNodeMatrix(int idx){
             return this->layers.at(idx)->vals_to_matrix();
         }
@@ -42,6 +35,34 @@ class NeuralNetwork{
         Matrix* getweighNodeMatrix(int idx){
             return this->weights.at(idx);
         }
+        double get_total_error(){return this->error;}
+        std::vector<double> get_errors(){return this->errors;}
+
+        //setter
+
+        void set_input(std::vector<double> input){
+            this->input = input;
+            for(int i=0;i<input.size();i++)
+                this->layers.at(i)->set_value(i, input.at(i));
+        }
+
+        void set_Node_val(int idx_layer, int idx_node, double val){
+            this->layers.at(idx_layer)->set_value(idx_node, val);
+        }
+
+        void set_errors(){
+            this->error = 0;
+            int out_layer = this->layers.size()-1;
+            std::vector<Node*> output_nodes = this->layers.at(out_layer)->get_nodes();
+            for(int i=0;i<this->target.size();i++){
+                double aux_err = (output_nodes.at(i)->get_actval() - target.at(i));
+                errors.at(i) = aux_err;
+                this->error += aux_err;
+            }
+            hist_errors.push_back(this->error);
+        }
+
+        // methods
         Matrix* multiplyMatrix(Matrix *a, Matrix *b){
             Matrix* c = new Matrix(a->get_rows(), b->get_cols(), false);
             #pragma omp parallel for
@@ -95,4 +116,9 @@ class NeuralNetwork{
         std::vector<Layer*> layers;
         std::vector<Matrix*> weights;
         std::vector<double> input;
+        std:: vector<double> target;
+        std:: vector<double> errors;
+        std:: vector<double> hist_errors;
+   
+        double error;
 };

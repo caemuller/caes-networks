@@ -39,6 +39,9 @@ class Layer{
                 m->set_value(0, i, this->nodes.at(i)->get_dxval());
             return m;
         }
+
+        std::vector<Node*> get_nodes(){return this->nodes;}
+
     private:
         int size;
         std::vector<Node*> nodes;
