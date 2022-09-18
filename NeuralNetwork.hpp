@@ -96,7 +96,7 @@ class NeuralNetwork{
         }
 
 
-        void feedForward(){
+        void feed_forward(){
             for(int i=0;i<this->layers.size()-1;i++){
                 Matrix *a = this->getNodeMatrix(i);
                 if(i)
@@ -110,11 +110,46 @@ class NeuralNetwork{
             }
         }
 
+        void back_propagation(){
+            vector<Matrix*> new_weights;
+            int output_idx = this->layers.size()-1;
+            Matrix *dx_y_to_z = this->layers.at(output_idx)->dxvals_to_matrix();
+            Matrix* gradients_yz = new Matrix(1, this->layers.at(output_idx)->get_nodes().size(), false);
+
+            for int(i=0;i<this->errors.size();i++)
+            {
+                double dx = dx_y_to_z->get_val(0, i);
+                double er = this->errors.at(i);
+                double gr = dx * er;
+                gradients_yz->set_value(0, i, gr);   
+            }
+
+            int last_hidden = output_idx-1;
+            Layer* last_hidden_layer = this->layers.at(last_hidden);
+            Matrix* weights_out_hidden = this->getweighNodeMatrix(last_hidden);
+            Matrix* delta_out = multiplyMatrix(gradients_yz->transpose(), last_hidden_layer->actvals_to_matrix())->transpose();
+            Matrix* new_weights_out_hidden = new Matrix(delta_out->get_rows(), delta_out->get_cols(), false);
+
+            for(int i=0;i<delta_out->get_rows();i++)
+                for(int j=0;j<delta_out->get_cols();j++)
+                    new_weights_out_hidden->set_value(i, j, weights_out_hidden->get_val(i, j) - delta_out->get_val(i, j));
+ 
+            new_weights.push_back(new_weights_out_hidden);
+
+            for(int i=last_hidden;i>0;i--)
+            {
+                layer* l = this->layers.at(i);
+                Matrix* derived = l->dxvals_to_matrix();
+                // Matrix* derived_gradients = 
+            }
+        }
+
     private:
         int topology_size;
         std::vector<int> topology;
         std::vector<Layer*> layers;
         std::vector<Matrix*> weights;
+        std::vector<Matrix*> gradients;
         std::vector<double> input;
         std:: vector<double> target;
         std:: vector<double> errors;
