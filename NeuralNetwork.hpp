@@ -111,12 +111,12 @@ class NeuralNetwork{
         }
 
         void back_propagation(){
-            vector<Matrix*> new_weights;
+            std::vector<Matrix*> new_weights;
             int output_idx = this->layers.size()-1;
             Matrix *dx_y_to_z = this->layers.at(output_idx)->dxvals_to_matrix();
             Matrix* gradients_yz = new Matrix(1, this->layers.at(output_idx)->get_nodes().size(), false);
 
-            for int(i=0;i<this->errors.size();i++)
+            for (int i=0;i<this->errors.size();i++)
             {
                 double dx = dx_y_to_z->get_val(0, i);
                 double er = this->errors.at(i);
@@ -138,7 +138,7 @@ class NeuralNetwork{
 
             for(int i=last_hidden;i>0;i--)
             {
-                layer* l = this->layers.at(i);
+                Layer* l = this->layers.at(i);
                 Matrix* derived = l->dxvals_to_matrix();
                 // Matrix* derived_gradients = 
             }
