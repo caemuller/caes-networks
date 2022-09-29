@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
-#include "node.hpp"
+#include "Node.hpp"
 #include "Matrix.hpp"
 
 class Layer{

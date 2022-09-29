@@ -1,9 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
-#include "node.hpp"
-#include "layer.hpp"
-#include "Matrix.hpp"
+#include "Layer.hpp"
 
 class NeuralNetwork{
     public:
@@ -112,9 +110,11 @@ class NeuralNetwork{
 
         void back_propagation(){
             std::vector<Matrix*> new_weights;
+            Matrix* gradients;
             int output_idx = this->layers.size()-1;
             Matrix *dx_y_to_z = this->layers.at(output_idx)->dxvals_to_matrix();
             Matrix* gradients_yz = new Matrix(1, this->layers.at(output_idx)->get_nodes().size(), false);
+            Matrix* left_nodes;
 
             for (int i=0;i<this->errors.size();i++)
             {
@@ -135,12 +135,45 @@ class NeuralNetwork{
                     new_weights_out_hidden->set_value(i, j, weights_out_hidden->get_val(i, j) - delta_out->get_val(i, j));
  
             new_weights.push_back(new_weights_out_hidden);
+            gradients = new Matrix(gradients_yz->get_rows(), gradients_yz->get_cols(), false);
+
+            for(int i=0;i<gradients_yz->get_rows();i++)
+                for(int j=0;j<gradients_yz->get_cols();j++)
+                    gradients->set_value(i, j, gradients_yz->get_val(i, j));
 
             for(int i=last_hidden;i>0;i--)
             {
                 Layer* l = this->layers.at(i);
                 Matrix* derived = l->dxvals_to_matrix();
-                // Matrix* derived_gradients = 
+                Matrix* derived_gradients = new Matrix(1, l->get_nodes().size(), false);
+                Matrix* activated_hidden = l->actvals_to_matrix();
+
+                Matrix* weight_matrix = this->weights.at(i);
+
+                for(int j=0;j<weight_matrix->get_rows();j++){
+                    double sum=0;
+                    for(int k=0;k<weight_matrix->get_cols();k++){
+                        sum += gradients->get_val(j, k) * weight_matrix->get_val(j, k);
+                    }
+                    derived_gradients->set_value(0, j, sum*activated_hidden->get_val(0, j));
+                }
+
+                if(!i-1)
+                    left_nodes = this->layers.at(i-1)->actvals_to_matrix();
+                else
+                    left_nodes = this->layers.at(0)->vals_to_matrix();
+
+                Matrix* delta_weights = multiplyMatrix(derived_gradients->transpose(), left_nodes)->transpose();
+                Matrix* new_weights_hidden = new Matrix(delta_weights->get_rows(), delta_weights->get_cols(), false);
+                for(int j=0;j<new_weights_hidden->get_rows();j++)
+                    for(int k=0;k<new_weights_hidden->get_cols();k++)
+                        new_weights_hidden->set_value(j, k, this->weights.at(i-1)->get_val(j, k) - delta_weights->get_val(j, k));
+
+                new_weights.push_back(new_weights_hidden);
+                gradients = new Matrix(derived_gradients->get_rows(), derived_gradients->get_cols(), false);
+                for(int j=0;j<gradients->get_rows();j++)
+                    for(int k=0;k<gradients->get_cols();k++)
+                        gradients->set_value(j, k, derived_gradients->get_val(j, k));
             }
         }
 
