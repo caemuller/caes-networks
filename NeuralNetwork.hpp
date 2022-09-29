@@ -2,7 +2,7 @@
 #include <vector>
 #include <math.h>
 #include "Layer.hpp"
-
+#include <algorithm>
 class NeuralNetwork{
     public:
         NeuralNetwork(std::vector<int> topology){
@@ -153,7 +153,7 @@ class NeuralNetwork{
                 for(int j=0;j<weight_matrix->get_rows();j++){
                     double sum=0;
                     for(int k=0;k<weight_matrix->get_cols();k++){
-                        sum += gradients->get_val(j, k) * weight_matrix->get_val(j, k);
+                        sum += gradients->get_val(0, k) * weight_matrix->get_val(j, k);
                     }
                     derived_gradients->set_value(0, j, sum*activated_hidden->get_val(0, j));
                 }
@@ -169,12 +169,14 @@ class NeuralNetwork{
                     for(int k=0;k<new_weights_hidden->get_cols();k++)
                         new_weights_hidden->set_value(j, k, this->weights.at(i-1)->get_val(j, k) - delta_weights->get_val(j, k));
 
-                new_weights.push_back(new_weights_hidden);
                 gradients = new Matrix(derived_gradients->get_rows(), derived_gradients->get_cols(), false);
                 for(int j=0;j<gradients->get_rows();j++)
                     for(int k=0;k<gradients->get_cols();k++)
                         gradients->set_value(j, k, derived_gradients->get_val(j, k));
+                new_weights.push_back(new_weights_hidden);
             }
+            std::reverse(new_weights.begin(), new_weights.end());
+            this->weights = new_weights;
         }
 
     private:
