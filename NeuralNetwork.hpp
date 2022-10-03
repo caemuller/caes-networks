@@ -71,6 +71,7 @@ class NeuralNetwork{
                         double val = c->get_val(i, j) + p;
                         c->set_value(i, j, val);
                     }
+            return c;
         }
 
         void show_nn(){

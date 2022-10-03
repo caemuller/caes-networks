@@ -36,7 +36,8 @@ class Matrix{
         double rng(){
             std::random_device rd;
             std::default_random_engine eng(rd());
-            std::uniform_real_distribution<float> distr(0, 1);
+            std::uniform_real_distribution<double> distr(0, 1);
+            return distr(eng);
         }
 
         Matrix *transpose(){
